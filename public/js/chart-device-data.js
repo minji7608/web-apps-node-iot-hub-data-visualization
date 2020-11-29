@@ -12,19 +12,22 @@ $(document).ready(() => {
       this.deviceId = deviceId;
       this.maxLen = 50;
       this.timeData = new Array(this.maxLen);
+      this.rfidData = new Array(this.maxLen)
       this.temperatureData = new Array(this.maxLen);
-      this.humidityData = new Array(this.maxLen);
+      // this.humidityData = new Array(this.maxLen);
     }
 
-    addData(time, temperature, humidity) {
+    addData(time, rfid, temperature) {
       this.timeData.push(time);
+      this.rfidData.push(rfid)
       this.temperatureData.push(temperature);
-      this.humidityData.push(humidity || null);
+      // this.humidityData.push(humidity || null);
 
       if (this.timeData.length > this.maxLen) {
         this.timeData.shift();
+        this.rfidData.shift();
         this.temperatureData.shift();
-        this.humidityData.shift();
+        // this.humidityData.shift();
       }
     }
   }
@@ -53,6 +56,7 @@ $(document).ready(() => {
 
   const trackedDevices = new TrackedDevices();
 
+  /*
   // Define the chart axes
   const chartData = {
     datasets: [
@@ -80,7 +84,9 @@ $(document).ready(() => {
       }
     ]
   };
+  */
 
+  /*
   const chartOptions = {
     scales: {
       yAxes: [{
@@ -103,9 +109,12 @@ $(document).ready(() => {
       }]
     }
   };
+  */
 
   // Get the context of the canvas element we want to select
-  const ctx = document.getElementById('iotChart').getContext('2d');
+  // const ctx = document.getElementById('iotChart').getContext('2d');
+  const records = document.getElementById('records');
+  /*
   const myLineChart = new Chart(
     ctx,
     {
@@ -113,12 +122,15 @@ $(document).ready(() => {
       data: chartData,
       options: chartOptions,
     });
-
+  */
   // Manage a list of devices in the UI, and update which device data the chart is showing
   // based on selection
+
   let needsAutoSelect = true;
   const deviceCount = document.getElementById('deviceCount');
   const listOfDevices = document.getElementById('listOfDevices');
+
+  /*
   function OnSelectionChange() {
     const device = trackedDevices.findDevice(listOfDevices[listOfDevices.selectedIndex].text);
     chartData.labels = device.timeData;
@@ -126,6 +138,20 @@ $(document).ready(() => {
     chartData.datasets[1].data = device.humidityData;
     myLineChart.update();
   }
+  */
+  function OnSelectionChange() {
+    const device = trackedDevices.findDevice(listOfDevices[listOfDevices.selectedIndex].text);
+    for (i = 0; i < device.rfidData.length; i++) {
+      const rfid = device.rfidData[i];
+      const temp = device.temperatureData[i];
+      var li = document.createElement('li');
+      li.setAttribute('id', rfid);
+      var recordString = "RFID: " + rfid + " TEMPERAUTRE: " + temp;
+      li.appendChild(document.createTextNode(recordString));
+      records.append(li);
+    }
+  }
+
   listOfDevices.addEventListener('change', OnSelectionChange, false);
 
   // When a web socket message arrives:
@@ -139,8 +165,9 @@ $(document).ready(() => {
       const messageData = JSON.parse(message.data);
       console.log(messageData);
 
-      // time and either temperature or humidity are required
-      if (!messageData.MessageDate || (!messageData.IotData.temperature && !messageData.IotData.humidity)) {
+      // time and either temperature or rfid are required
+      if (!messageData.MessageDate || (!messageData.IotData.rfid && !messageData.IotData.temperature)) {
+        console.log("ERROR: Received invalid message")
         return;
       }
 
@@ -148,7 +175,7 @@ $(document).ready(() => {
       const existingDeviceData = trackedDevices.findDevice(messageData.DeviceId);
 
       if (existingDeviceData) {
-        existingDeviceData.addData(messageData.MessageDate, messageData.IotData.temperature, messageData.IotData.humidity);
+        existingDeviceData.addData(messageData.MessageDate, messageData.IotData.rfid, messageData.IotData.temperature);
       } else {
         const newDeviceData = new DeviceData(messageData.DeviceId);
         trackedDevices.devices.push(newDeviceData);
@@ -170,7 +197,13 @@ $(document).ready(() => {
         }
       }
 
-      myLineChart.update();
+      // var li = document.createElement('li');
+      // li.setAttribute('id', rfid);
+      // var recordString = "RFID: " + rfid + " TEMPERAUTRE: " + temp;
+      // li.appendChild(document.createTextNode(recordString));
+      // records.append(li);
+
+      // myLineChart.update();
     } catch (err) {
       console.error(err);
     }
