@@ -44,3 +44,66 @@ select::-ms-expand {
 select:disabled::-ms-expand {
   background: #f60;
 }
+
+.list-group-item {
+  border:1 !important;
+  /* padding-top:2px !important; */
+  /* padding-bottom:2px !important; */
+}
+
+.header {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  height: 130px;
+  width: 100%
+  margin-bottom: 20px;
+  border-bottom:1px solid #CCC;
+}
+
+.header img {
+  float: left;
+  width: 100px;
+  height: 100px;
+}
+
+.header h1 {
+  position: relative;
+  line-height: 100px;
+  /* top: 18px; */
+  left: 10px;
+  color: #444444;
+  font-size: 40px;
+}
+
+.subheader {
+  padding-left: 20px;
+  height: 60px;
+  background: #EEEEEE;
+  border-radius: 10px;
+  line-height: 60px;
+  margin-top: 30px;
+  margin-left: 10px;
+  margin-right: 10px;
+  margin-bottom: 20px;
+}
+
+.subheader #selectDeviceText {
+  color: #444444;
+  font-weight: 300;
+}
+
+.subheader #listOfDevices {
+  width: 300px;
+  margin-left: 20px;
+  border-radius: 15px;
+  padding-left: 20px;
+}
+
+.records-container {
+  margin-left: 10px;
+}
+
+.records-container h2 {
+  color: #4b4a4a;
+}

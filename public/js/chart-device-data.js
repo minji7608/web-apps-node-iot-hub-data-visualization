@@ -21,14 +21,15 @@ $(document).ready(() => {
       this.timeData.push(time);
       this.rfidData.push(rfid)
       this.temperatureData.push(temperature);
+      AppendNewDataToList(time, rfid, temperature)
       // this.humidityData.push(humidity || null);
 
-      if (this.timeData.length > this.maxLen) {
-        this.timeData.shift();
-        this.rfidData.shift();
-        this.temperatureData.shift();
-        // this.humidityData.shift();
-      }
+      // if (this.timeData.length > this.maxLen) {
+      //   this.timeData.shift();
+      //   this.rfidData.shift();
+      //   this.temperatureData.shift();
+      //   // this.humidityData.shift();
+      // }
     }
   }
 
@@ -139,16 +140,61 @@ $(document).ready(() => {
     myLineChart.update();
   }
   */
+
+  /* 
+  <div class="card">
+                <div class="card-body">
+                  This is some text within a card block.
+                </div>
+            </div>
+
+<li class="list-group-item">Cras justo odio</li>
+
+<tr>
+                <td>Dummy</td>
+                <td>Row</td>
+                <th scope="row">2020-11-30T03:26:55.178Z</th>
+              </tr>
+  */
+  function AppendNewDataToList(time, rfid, temp) {
+    var row = document.createElement('tr');
+    row.setAttribute('id', rfid);
+
+    timeObj = new Date(time);
+    var mytime = timeObj.toLocaleDateString() + " " + timeObj.toLocaleTimeString();
+
+    var timeRecord = document.createElement('td');
+    var rfidRecord = document.createElement('td');
+    var tempRecord = document.createElement('td');
+
+    timeRecord.appendChild(document.createTextNode(mytime));
+    rfidRecord.appendChild(document.createTextNode(rfid));
+    tempRecord.appendChild(document.createTextNode(temp));
+
+    row.append(rfidRecord);
+    row.append(tempRecord);
+    row.append(timeRecord);
+
+    var recordString = "RFID: " + rfid + " TEMPERAUTRE: " + temp;
+    records.append(row);
+  }
+
   function OnSelectionChange() {
     const device = trackedDevices.findDevice(listOfDevices[listOfDevices.selectedIndex].text);
     for (i = 0; i < device.rfidData.length; i++) {
+      const time = device.timeData[i];
       const rfid = device.rfidData[i];
       const temp = device.temperatureData[i];
-      var li = document.createElement('li');
-      li.setAttribute('id', rfid);
-      var recordString = "RFID: " + rfid + " TEMPERAUTRE: " + temp;
-      li.appendChild(document.createTextNode(recordString));
-      records.append(li);
+      if (!rfid || !temp) {
+        continue;
+      }
+      console.log("creating a new list element with rfid: " + rfid + " temp: " + temp);
+      AppendNewDataToList(time, rfid, temp)
+      // var li = document.createElement('li');
+      // li.setAttribute('id', rfid);
+      // var recordString = "RFID: " + rfid + " TEMPERAUTRE: " + temp;
+      // li.appendChild(document.createTextNode(recordString));
+      // records.append(li);
     }
   }
 
@@ -175,13 +221,17 @@ $(document).ready(() => {
       const existingDeviceData = trackedDevices.findDevice(messageData.DeviceId);
 
       if (existingDeviceData) {
+        console.log("found existing device")
         existingDeviceData.addData(messageData.MessageDate, messageData.IotData.rfid, messageData.IotData.temperature);
+        // AppendNewDataToList(messageData.MessageDate, messageData.IotData.rfid, messageData.IotData.temperature);
       } else {
+        console.log("adding new device")
         const newDeviceData = new DeviceData(messageData.DeviceId);
         trackedDevices.devices.push(newDeviceData);
+        console.log("pushed new device: " + messageData.DeviceId);
         const numDevices = trackedDevices.getDevicesCount();
-        deviceCount.innerText = numDevices === 1 ? `${numDevices} device` : `${numDevices} devices`;
-        newDeviceData.addData(messageData.MessageDate, messageData.IotData.temperature, messageData.IotData.humidity);
+        // deviceCount.innerText = numDevices === 1 ? `${numDevices} device` : `${numDevices} devices`;
+        newDeviceData.addData(messageData.MessageDate, messageData.IotData.rfid, messageData.IotData.temperature);
 
         // add device to the UI list
         const node = document.createElement('option');
@@ -193,7 +243,7 @@ $(document).ready(() => {
         if (needsAutoSelect) {
           needsAutoSelect = false;
           listOfDevices.selectedIndex = 0;
-          OnSelectionChange();
+          // OnSelectionChange();
         }
       }
 
@@ -209,3 +259,5 @@ $(document).ready(() => {
     }
   };
 });
+
+
